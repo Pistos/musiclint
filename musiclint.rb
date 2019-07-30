@@ -56,7 +56,7 @@ module MusicLint
     end
 
     def chords
-      @times.map { |t| chord_at(t) }
+      @times.sort.map { |t| chord_at(t) }
     end
 
     def chord_at(time)
@@ -69,9 +69,41 @@ module MusicLint
   end
 
   class Pitch
+    STEP_TO_INT = {
+      'Ab' => 11,
+      'A' => 0,
+      'A#' => 1,
+      'Bb' => 1,
+      'B' => 2,
+      'B#' => 3,
+      'Cb' => 2,
+      'C' => 3,
+      'C#' => 4,
+      'Db' => 4,
+      'D' => 5,
+      'D#' => 6,
+      'Eb' => 6,
+      'E' => 7,
+      'E#' => 8,
+      'Fb' => 7,
+      'F' => 8,
+      'F#' => 9,
+      'Gb' => 9,
+      'G' => 10,
+      'G#' => 11,
+    }
+
     def initialize(xml_node:)
-      @octave = xml_node.at('octave').content
+      @octave = xml_node.at('octave').content.to_i
       @step = xml_node.at('step').content
+    end
+
+    def interval(other_pitch)
+      other_pitch.to_i - self.to_i
+    end
+
+    def to_i
+      @octave * 12 + STEP_TO_INT[@step]
     end
 
     def to_s
@@ -95,6 +127,10 @@ module MusicLint
       @voice = "#{part_id}-#{xml_voice}"
     end
 
+    def interval(other_note)
+      @pitch.interval(other_note.pitch)
+    end
+
     def rest?
       @rest
     end
@@ -105,22 +141,30 @@ module MusicLint
   end
 
   class Chord
-    def initialize
-      @notes = {}
+    def [](index)
+      notes[index]
     end
 
     def add_note(note)
       @notes[note.voice] = note
     end
 
-    def voices
-      @notes.keys
+    def initialize
+      @notes = {}
+    end
+
+    def notes
+      voices.map { |voice|
+        @notes[voice]
+      }
     end
 
     def to_s
-      voices.sort.reverse.map { |voice|
-        @notes[voice].to_s
-      }.join('-')
+      notes.map(&:to_s).join('-')
+    end
+
+    def voices
+      @notes.keys.sort.reverse
     end
   end
 
@@ -133,7 +177,14 @@ module MusicLint
     end
 
     def run
-      puts @score[1].chords
+      chords = @score[1].chords
+      puts chords[1]
+      n1 = chords[1][0]
+      n2 = chords[1][1]
+
+      puts n1
+      puts n2
+      puts n1.interval(n2)
     end
   end
 end
