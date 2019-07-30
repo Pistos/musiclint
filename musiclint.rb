@@ -20,12 +20,8 @@ module MusicLint
       end
     end
 
-    def chord_at(measure_number:, time:)
-      @measures[measure_number].chord_at(time)
-    end
-
     def chords
-      @measures.map(&:chords).flatten
+      @measures.values.map(&:chords).flatten
     end
   end
 
@@ -64,11 +60,20 @@ module MusicLint
     end
 
     def chord_at(time)
-      Chord.new.tap { |chord|
-        @notes[BigDecimal(time)].each do |note|
-          chord.add_note(note)
-        end
-      }
+      t = BigDecimal(time)
+      notes = @notes[t]
+
+      if notes.empty?
+        NilChord.new
+      else
+        Chord.new(
+          location: "measure #{@number}, beat #{t.to_s('F')}"
+        ).tap { |chord|
+          notes.each do |note|
+            chord.add_note(note)
+          end
+        }
+      end
     end
   end
 
@@ -136,6 +141,10 @@ module MusicLint
   end
 
   class Interval
+    def -(other_interval)
+      self.to_i - other_interval.to_i
+    end
+
     def initialize(note1, note2)
       @note1 = note1
       @note2 = note2
@@ -145,6 +154,10 @@ module MusicLint
       "#{@note1}-#{@note2} #{to_i}"
     end
 
+    def perfect?
+      [5, 7, 12].include? to_i
+    end
+
     def to_i
       @note2.pitch.to_i - @note1.pitch.to_i
     end
@@ -152,9 +165,21 @@ module MusicLint
     def to_s
       to_i.to_s
     end
+
+    def voices
+      [@note1.voice, @note2.voice]
+    end
+  end
+
+  class NilInterval
+    def perfect?
+      nil
+    end
   end
 
   class Chord
+    attr_reader :location
+
     def [](index)
       notes[index]
     end
@@ -163,8 +188,9 @@ module MusicLint
       @notes[note.voice] = note
     end
 
-    def initialize
+    def initialize(location:)
       @notes = {}
+      @location = location
     end
 
     def intervals
@@ -204,6 +230,78 @@ module MusicLint
     end
   end
 
+  class NilChord
+    def intervals
+      Hash.new(NilInterval.new)
+    end
+
+    def note_by(voice:)
+      nil  # NilNote.new
+    end
+
+    def notes
+      []
+    end
+
+    def to_s
+      nil
+    end
+  end
+
+  class Problem
+    ERROR_TYPE = 'error'
+    WARNING_TYPE = 'warning'
+
+    def initialize(
+      details:,
+      location:,
+      name:,
+      type:
+    )
+      @details = details
+      @location = location
+      @name = name
+      @type = type
+    end
+
+    def to_s
+      "%-24s  %-8s  %-40s  %s" % [@location, @type, @details, @name]
+    end
+  end
+
+  module Rules
+    class NoConsecutivePerfectIntervals
+      NAME = 'no-consecutive-perfect-intervals'
+
+      def self.check(score)
+        problems = []
+
+        chords = score.chords
+        chords.each_with_index do |chord, i|
+          next_chord = chords[i+1] || NilChord.new
+          intervals = chord.intervals
+          next_intervals = next_chord.intervals
+          voice_pairs = Set.new
+
+          intervals.each do |voices, int|
+            next_int = next_intervals[voices]
+
+            if int.perfect? && next_int.perfect?
+              problems << Problem.new(
+                details: 'Consecutive perfect intervals',
+                location: chord.location,
+                name: NAME,
+                type: Problem::ERROR_TYPE,
+              )
+            end
+          end
+        end
+
+        problems
+      end
+    end
+  end
+
   class App
     def initialize
       doc = Nokogiri::XML(
@@ -213,10 +311,18 @@ module MusicLint
     end
 
     def run
-      chords = @score[1].chords
-      cn = ARGV[1].to_i
-      puts chords[cn]
-      pp chords[cn].intervals
+      problems = []
+      rules = [
+        Rules::NoConsecutivePerfectIntervals,
+      ]
+
+      rules.each do |rule|
+        problems += rule.check(@score)
+      end
+
+      problems.each do |problem|
+        puts problem
+      end
     end
   end
 end
