@@ -1,3 +1,4 @@
+require 'bigdecimal'
 require 'nokogiri'
 require 'pp'
 
@@ -15,7 +16,7 @@ module MusicLint
       end
     end
 
-    def chord_at(measure_number:, time: 0)
+    def chord_at(measure_number:, time:)
       @measures[measure_number].chord_at(time)
     end
   end
@@ -32,10 +33,10 @@ module MusicLint
       @number ||= measure_node.attribute('number').content.to_i
 
       times = Set.new
-      times << 0
+      times << BigDecimal("0")
       @notes ||= Hash.new { |h, k| h[k] = [] }
 
-      total_duration = Hash.new(0)
+      total_duration = Hash.new(BigDecimal("0"))
       index = 0
 
       notes.each do |note|
@@ -49,7 +50,7 @@ module MusicLint
 
     def chord_at(time)
       Chord.new.tap { |chord|
-        @notes[time].each do |note|
+        @notes[BigDecimal(time)].each do |note|
           chord.add_note(note)
         end
       }
@@ -71,7 +72,7 @@ module MusicLint
     attr_reader :duration, :pitch, :voice
 
     def initialize(part_id:, xml_node:)
-      @duration = xml_node.at('duration').content.to_i
+      @duration = BigDecimal(xml_node.at('duration').content)
       pitch_node = xml_node.at('pitch')
       if pitch_node
         @pitch = Pitch.new(xml_node: pitch_node)
@@ -121,7 +122,10 @@ module MusicLint
     end
 
     def run
-      c = @score.chord_at(measure_number: 1, time: ARGV[1].to_i)
+      c = @score.chord_at(
+        measure_number: 1,
+        time: BigDecimal(ARGV[1])
+      )
       puts c
     end
   end
