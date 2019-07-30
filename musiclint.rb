@@ -19,10 +19,19 @@ module MusicLint
     def chord_at(measure_number:, time:)
       @measures[measure_number].chord_at(time)
     end
+
+    def [](measure_number)
+      @measures[measure_number]
+    end
   end
 
   class Measure
     attr_reader :number
+
+    def initialize
+      @notes ||= Hash.new { |h, k| h[k] = [] }
+      @times ||= Set.new
+    end
 
     def parse(measure_node:, part_node:)
       part_id = part_node.attribute('id').content
@@ -32,9 +41,7 @@ module MusicLint
       }
       @number ||= measure_node.attribute('number').content.to_i
 
-      times = Set.new
-      times << BigDecimal("0")
-      @notes ||= Hash.new { |h, k| h[k] = [] }
+      @times << BigDecimal("0")
 
       total_duration = Hash.new(BigDecimal("0"))
       index = 0
@@ -43,9 +50,13 @@ module MusicLint
         voice = "#{part_id}-#{note.voice}"
         total_duration[voice] += note.duration
         time = total_duration[voice]
-        times << time
+        @times << time
         @notes[time] << note
       end
+    end
+
+    def chords
+      @times.map { |t| chord_at(t) }
     end
 
     def chord_at(time)
@@ -122,11 +133,7 @@ module MusicLint
     end
 
     def run
-      c = @score.chord_at(
-        measure_number: 1,
-        time: BigDecimal(ARGV[1])
-      )
-      puts c
+      puts @score[1].chords
     end
   end
 end
