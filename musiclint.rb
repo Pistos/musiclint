@@ -4,6 +4,10 @@ require 'pp'
 
 module MusicLint
   class Score
+    def [](measure_number)
+      @measures[measure_number]
+    end
+
     def initialize(xml_doc:)
       @measures = Hash.new { |h,k| h[k] = Measure.new }
 
@@ -20,8 +24,8 @@ module MusicLint
       @measures[measure_number].chord_at(time)
     end
 
-    def [](measure_number)
-      @measures[measure_number]
+    def chords
+      @measures.map(&:chords).flatten
     end
   end
 
@@ -152,9 +156,28 @@ module MusicLint
       @notes = {}
     end
 
+    def intervals
+      vs1 = voices
+      vs2 = vs1.dup
+
+      Hash.new.tap { |_intervals|
+        vs1.each_with_index do |v1, i|
+          vs2.each_with_index do |v2, j|
+            if j > i
+              _intervals[ [v1, v2] ] = @notes[v1].interval( @notes[v2] )
+            end
+          end
+        end
+      }
+    end
+
+    def note_by(voice:)
+      @notes[voice]
+    end
+
     def notes
       voices.map { |voice|
-        @notes[voice]
+        note_by(voice: voice)
       }
     end
 
@@ -177,13 +200,9 @@ module MusicLint
 
     def run
       chords = @score[1].chords
-      puts chords[1]
-      n1 = chords[1][0]
-      n2 = chords[1][1]
-
-      puts n1
-      puts n2
-      puts n1.interval(n2)
+      cn = ARGV[1].to_i
+      puts chords[cn]
+      pp chords[cn].intervals
     end
   end
 end
