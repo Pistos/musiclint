@@ -68,46 +68,45 @@ module MusicLint
     end
   end
 
+  # TODO: Maybe we should generate all piano Pitches ahead of time.
+  #   This stuff is all static.
   class Pitch
     STEP_TO_INT = {
-      'Ab' => 11,
-      'A' => 0,
-      'A#' => 1,
-      'Bb' => 1,
-      'B' => 2,
-      'B#' => 3,
-      'Cb' => 2,
-      'C' => 3,
-      'C#' => 4,
-      'Db' => 4,
-      'D' => 5,
-      'D#' => 6,
-      'Eb' => 6,
-      'E' => 7,
-      'E#' => 8,
-      'Fb' => 7,
-      'F' => 8,
-      'F#' => 9,
-      'Gb' => 9,
-      'G' => 10,
-      'G#' => 11,
+      'Cb' => -1,
+      'C' => 0,
+      'C#' => 1,
+      'Db' => 1,
+      'D' => 2,
+      'D#' => 3,
+      'Eb' => 3,
+      'E' => 4,
+      'E#' => 5,
+      'Fb' => 4,
+      'F' => 5,
+      'F#' => 6,
+      'Gb' => 6,
+      'G' => 7,
+      'G#' => 8,
+      'Ab' => 8,
+      'A' => 9,
+      'A#' => 10,
+      'Bb' => 10,
+      'B' => 11,
+      'B#' => 12,
     }
+
+    attr_reader :to_i, :to_s
 
     def initialize(xml_node:)
       @octave = xml_node.at('octave').content.to_i
       @step = xml_node.at('step').content
+
+      @to_i = @octave * 12 + STEP_TO_INT[@step]
+      @to_s = "#{@step}#{@octave}"
     end
 
     def interval(other_pitch)
       other_pitch.to_i - self.to_i
-    end
-
-    def to_i
-      @octave * 12 + STEP_TO_INT[@step]
-    end
-
-    def to_s
-      "#{@step}#{@octave}"
     end
   end
 
