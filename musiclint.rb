@@ -255,6 +255,10 @@ module MusicLint
     ERROR_TYPE = 'error'
     WARNING_TYPE = 'warning'
 
+    def error?
+      @type == ERROR_TYPE
+    end
+
     def initialize(
       details:,
       location:,
@@ -269,6 +273,10 @@ module MusicLint
 
     def to_s
       "%-24s  %-8s  %-40s  %s" % [@location, @type, @details, @name]
+    end
+
+    def warning?
+      @type == WARNING_TYPE
     end
   end
 
@@ -326,6 +334,19 @@ module MusicLint
       problems.each do |problem|
         puts problem
       end
+
+      error_count = problems.find_all(&:error?).count
+      warning_count = problems.find_all(&:warning?).count
+      problem_plural_morpheme = problems.count == 1 ? '' : 's'
+      error_plural_morpheme = error_count == 1 ? '' : 's'
+      warning_plural_morpheme = warning_count == 1 ? '' : 's'
+
+      problem_str = "#{problems.count} problem#{problem_plural_morpheme}"
+      error_str = "#{error_count} error#{error_plural_morpheme}"
+      warning_str = "#{warning_count} warning#{warning_plural_morpheme}"
+
+      puts
+      puts "   #{problem_str} (#{error_str}, #{warning_str})"
     end
   end
 end
