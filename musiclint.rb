@@ -81,37 +81,29 @@ module MusicLint
   #   This stuff is all static.
   class Pitch
     STEP_TO_INT = {
-      'Cb' => -1,
       'C' => 0,
-      'C#' => 1,
-      'Db' => 1,
       'D' => 2,
-      'D#' => 3,
-      'Eb' => 3,
       'E' => 4,
-      'E#' => 5,
-      'Fb' => 4,
       'F' => 5,
-      'F#' => 6,
-      'Gb' => 6,
       'G' => 7,
-      'G#' => 8,
-      'Ab' => 8,
       'A' => 9,
-      'A#' => 10,
-      'Bb' => 10,
       'B' => 11,
-      'B#' => 12,
     }
 
     attr_reader :to_i, :to_s
 
     def initialize(xml_node:)
       @octave = xml_node.at('octave').content.to_i
-      @step = xml_node.at('step').content
+      alter_node = xml_node.at('alter')
+      if alter_node
+        alter = alter_node.content.to_i
+      else
+        alter = 0
+      end
+      step = xml_node.at('step').content
 
-      @to_i = @octave * 12 + STEP_TO_INT[@step]
-      @to_s = "#{@step}#{@octave}"
+      @to_i = @octave * 12 + STEP_TO_INT[step] + alter
+      @to_s = "#{step}#{@octave}"
     end
   end
 
