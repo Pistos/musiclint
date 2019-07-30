@@ -108,10 +108,6 @@ module MusicLint
       @to_i = @octave * 12 + STEP_TO_INT[@step]
       @to_s = "#{@step}#{@octave}"
     end
-
-    def interval(other_pitch)
-      other_pitch.to_i - self.to_i
-    end
   end
 
   class Note
@@ -130,16 +126,31 @@ module MusicLint
       @voice = "#{part_id}-#{xml_voice}"
     end
 
-    def interval(other_note)
-      @pitch.interval(other_note.pitch)
-    end
-
     def rest?
       @rest
     end
 
     def to_s
       pitch.to_s
+    end
+  end
+
+  class Interval
+    def initialize(note1, note2)
+      @note1 = note1
+      @note2 = note2
+    end
+
+    def inspect
+      "#{@note1}-#{@note2} #{to_i}"
+    end
+
+    def to_i
+      @note2.pitch.to_i - @note1.pitch.to_i
+    end
+
+    def to_s
+      to_i.to_s
     end
   end
 
@@ -164,7 +175,10 @@ module MusicLint
         vs1.each_with_index do |v1, i|
           vs2.each_with_index do |v2, j|
             if j > i
-              _intervals[ [v1, v2] ] = @notes[v1].interval( @notes[v2] )
+              _intervals[ [v1, v2] ] = Interval.new(
+                @notes[v1],
+                @notes[v2]
+              )
             end
           end
         end
