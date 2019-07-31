@@ -19,7 +19,12 @@ module MusicLint
           intervals.each do |voices, int|
             next_int = next_intervals[voices] || NilInterval.new
 
-            if int.perfect? && next_int.perfect?
+            if (
+              int.perfect? &&
+              int.simple_number_integer != 4 &&
+              next_int.perfect? &&
+              next_int.simple_number_integer != 4
+            )
               problems << Problem.new(
                 details: "Consecutive perfect intervals: #{int}, #{next_int}",
                 location: chord.location,
