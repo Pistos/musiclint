@@ -13,23 +13,28 @@ module MusicLint
 
     def parse(measure_node:, part_node:)
       part_id = part_node.attribute('id').content
-
-      notes = measure_node.xpath('note').map { |n|
-        Note.new(part_id: part_id, xml_node: n)
-      }
       @number ||= measure_node.attribute('number').content.to_i
 
-      @times << BigDecimal("0")
+      if measure_node.at('attributes/divisions')
+        @divisions = BigDecimal(measure_node.at('attributes/divisions').content)
 
-      total_duration = Hash.new(BigDecimal("0"))
-      index = 0
+        notes = measure_node.xpath('note').map { |n|
+          Note.new(part_id: part_id, xml_node: n)
+        }
 
-      notes.each do |note|
-        voice = "#{part_id}-#{note.voice}"
-        total_duration[voice] += note.duration
-        time = total_duration[voice]
-        @times << time
-        @notes[time] << note
+        # TODO: Can't assume the first note is at time 0
+        @times << BigDecimal("0")
+
+        total_duration = Hash.new(BigDecimal("0"))
+        index = 0
+
+        notes.each do |note|
+          voice = "#{part_id}-#{note.voice}"
+          total_duration[voice] += note.duration / @divisions
+          time = total_duration[voice]
+          @times << time
+          @notes[time] << note
+        end
       end
     end
 
