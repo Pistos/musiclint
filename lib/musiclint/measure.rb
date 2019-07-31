@@ -22,9 +22,6 @@ module MusicLint
           Note.new(part_id: part_id, xml_node: n)
         }
 
-        # TODO: Can't assume the first note is at time 0
-        @times << BigDecimal("0")
-
         total_duration = Hash.new(BigDecimal("0"))
         index = 0
 
