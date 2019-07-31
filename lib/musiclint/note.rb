@@ -21,6 +21,14 @@ module MusicLint
       @rest
     end
 
+    def staff_position
+      @pitch&.staff_position
+    end
+
+    def step
+      @pitch.step
+    end
+
     def to_s
       pitch.to_s
     end

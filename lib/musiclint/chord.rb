@@ -25,10 +25,14 @@ module MusicLint
         vs1.each_with_index do |v1, i|
           vs2.each_with_index do |v2, j|
             if j > i
-              _intervals[ [v1, v2] ] = Interval.new(
-                @notes[v1],
-                @notes[v2]
-              )
+              n1 = @notes[v1]
+              n2 = @notes[v2]
+
+              if n1 && n2 && ! n1.rest? && ! n2.rest?
+                _intervals[ [v1, v2] ] = Interval.new(n1, n2)
+              else
+                _intervals[ [v1, v2] ] = NilInterval.new
+              end
             end
           end
         end

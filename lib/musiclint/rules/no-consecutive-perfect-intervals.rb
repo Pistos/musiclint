@@ -17,11 +17,11 @@ module MusicLint
           voice_pairs = Set.new
 
           intervals.each do |voices, int|
-            next_int = next_intervals[voices]
+            next_int = next_intervals[voices] || NilInterval.new
 
             if int.perfect? && next_int.perfect?
               problems << Problem.new(
-                details: 'Consecutive perfect intervals',
+                details: "Consecutive perfect intervals: #{int}, #{next_int}",
                 location: chord.location,
                 name: NAME,
                 type: Problem::ERROR_TYPE,
