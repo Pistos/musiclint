@@ -51,9 +51,7 @@ module MusicLint
     end
 
     def notes
-      voices.map { |voice|
-        note_by(voice: voice)
-      }
+      @notes.values.sort
     end
 
     def to_s

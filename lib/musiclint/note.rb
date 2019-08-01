@@ -5,6 +5,10 @@ module MusicLint
   class Note
     attr_reader :duration, :pitch, :voice
 
+    def <=>(other_note)
+      @pitch <=> other_note.pitch
+    end
+
     def initialize(part_id:, xml_node:)
       @duration = BigDecimal(xml_node.at('duration').content)
       pitch_node = xml_node.at('pitch')

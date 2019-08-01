@@ -30,6 +30,10 @@ module MusicLint
 
     attr_reader :staff_position, :to_i, :to_s
 
+    def <=>(other_pitch)
+      @to_i <=> other_pitch.to_i
+    end
+
     def initialize(xml_node:)
       @octave = xml_node.at('octave').content.to_i
 
