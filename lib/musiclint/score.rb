@@ -7,13 +7,17 @@ module MusicLint
     end
 
     def initialize(xml_doc:)
-      @measures = Hash.new { |h,k| h[k] = Measure.new }
+      @measures = {}
 
       xml_doc.xpath('//part').each do |part_node|
+        divisions = nil
+
         part_node.xpath('measure').each do |measure_node|
+          part_id = part_node.attribute('id').content
+
           measure_number = measure_node.attribute('number').content.to_i
-          measure = @measures[measure_number]
-          measure.parse(measure_node: measure_node, part_node: part_node)
+          @measures[measure_number] ||= Measure.new(divisions: divisions)
+          divisions = @measures[measure_number].parse(measure_node: measure_node, part_id: part_id)
         end
       end
     end
