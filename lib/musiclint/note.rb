@@ -1,3 +1,4 @@
+require 'bigdecimal'
 require 'musiclint/pitch'
 
 module MusicLint
@@ -15,6 +16,10 @@ module MusicLint
       end
       xml_voice = xml_node.at('voice').content.to_i
       @voice = "#{part_id}-#{xml_voice}"
+    end
+
+    def note?
+      ! @rest
     end
 
     def rest?
