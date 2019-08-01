@@ -1,6 +1,9 @@
 require 'musiclint/interval'
 
 module MusicLint
+  class DuplicateNoteError < StandardError
+  end
+
   class Chord
     attr_reader :location
 
@@ -9,7 +12,11 @@ module MusicLint
     end
 
     def add_note(note)
-      @notes[note.voice] = note
+      if @notes[note.voice]
+        raise DuplicateNoteError.new("Chord at #{@location} already has a note by voice #{note.voice}")
+      else
+        @notes[note.voice] = note
+      end
     end
 
     def initialize(location:)
