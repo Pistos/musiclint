@@ -14,7 +14,6 @@ module MusicLint
           next_chord = chords[i+1] || NilChord.new
           intervals = chord.intervals
           next_intervals = next_chord.intervals
-          voice_pairs = Set.new
 
           intervals.each do |voices, int|
             next_int = next_intervals[voices] || NilInterval.new
@@ -26,7 +25,7 @@ module MusicLint
               next_int.simple_number_integer != 4
             )
               problems << Problem.new(
-                details: "Consecutive perfect intervals: #{int}, #{next_int}",
+                details: "Consecutive perfect intervals: voices #{voices}  #{int}, #{next_int}",
                 location: chord.location,
                 name: NAME,
                 type: Problem::ERROR_TYPE,
