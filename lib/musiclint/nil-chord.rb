@@ -6,6 +6,10 @@ module MusicLint
       Hash.new(NilInterval.new)
     end
 
+    def merge(chord)
+      chord
+    end
+
     def note_by(voice:)
       nil  # NilNote.new
     end

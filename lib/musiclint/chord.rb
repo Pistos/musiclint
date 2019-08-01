@@ -46,6 +46,17 @@ module MusicLint
       }
     end
 
+    def merge(other_chord)
+      Chord.new(location: @location).tap { |chord|
+        notes.each do |note|
+          chord.add_note note
+        end
+        other_chord.notes.each do |note|
+          chord.add_note note
+        end
+      }
+    end
+
     def note_by(voice:)
       @notes[voice]
     end
