@@ -35,7 +35,7 @@ module MusicLint
               n1 = @notes[v1]
               n2 = @notes[v2]
 
-              if n1 && n2 && ! n1.rest? && ! n2.rest?
+              if n1 && n2 && n1.note? && n2.note?
                 _intervals[ [v1, v2] ] = Interval.new(n1, n2)
               else
                 _intervals[ [v1, v2] ] = NilInterval.new
