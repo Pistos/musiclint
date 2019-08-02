@@ -6,8 +6,8 @@ module MusicLint
       Hash.new(NilInterval.new)
     end
 
-    def location
-      nil
+    def moment
+      nil  # NilMoment.new
     end
 
     def merge(chord)

@@ -9,18 +9,18 @@ module MusicLint
 
     def initialize(
       details:,
-      location:,
+      moment:,
       name:,
       type:
     )
       @details = details
-      @location = location
+      @moment = moment
       @name = name
       @type = type
     end
 
     def to_s
-      "%-24s  %-8s  %-40s  %s" % [@location, @type, @details, @name]
+      "%-24s  %-8s  %-40s  %s" % [@moment, @type, @details, @name]
     end
 
     def warning?

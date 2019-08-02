@@ -5,7 +5,7 @@ module MusicLint
   end
 
   class Chord
-    attr_reader :location
+    attr_reader :moment
 
     def [](index)
       notes[index]
@@ -13,15 +13,15 @@ module MusicLint
 
     def add_note(note)
       if @notes[note.voice]
-        raise DuplicateNoteError.new("Chord at #{@location} already has a note by voice #{note.voice}")
+        raise DuplicateNoteError.new("Chord at #{@moment} already has a note by voice #{note.voice}")
       else
         @notes[note.voice] = note
       end
     end
 
-    def initialize(location:)
+    def initialize(moment:)
       @notes = {}
-      @location = location
+      @moment = moment
     end
 
     def intervals
@@ -47,7 +47,7 @@ module MusicLint
     end
 
     def merge(other_chord)
-      Chord.new(location: @location).tap { |chord|
+      Chord.new(moment: @moment).tap { |chord|
         notes.each do |note|
           chord.add_note note
         end

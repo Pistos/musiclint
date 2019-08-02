@@ -1,9 +1,10 @@
 require 'factories/note'
 require 'musiclint/chord'
+require 'musiclint/moment'
 
 describe MusicLint::Chord do
-  let(:location) { 'some location' }
-  let(:chord) { MusicLint::Chord.new(location: location) }
+  let(:moment) { MusicLint::Moment.new(measure_number: 1, time_in_measure: 1) }
+  let(:chord) { MusicLint::Chord.new(moment: moment) }
   let(:n1) { Factories::Note.create(step: 'C', octave: 4, voice: '1') }
   let(:n2) { Factories::Note.create(step: 'F', octave: 3, voice: '2') }
   let(:n3) { Factories::Note.create(step: 'G', octave: 3, voice: '3') }
@@ -39,8 +40,8 @@ describe MusicLint::Chord do
 
   context "given two chords" do
     let(:chord1) { chord }
-    let(:location2) { 'some other location' }
-    let(:chord2) { MusicLint::Chord.new(location: location2) }
+    let(:moment2) { MusicLint::Moment.new(measure_number: 1, time_in_measure: 1) }
+    let(:chord2) { MusicLint::Chord.new(moment: moment2) }
 
     before do
       chord1.add_note n1

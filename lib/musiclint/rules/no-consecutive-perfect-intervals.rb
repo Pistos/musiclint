@@ -30,7 +30,7 @@ module MusicLint
             )
               problems << Problem.new(
                 details: "Consecutive perfect intervals: voices #{voices}  #{int}, #{next_int}",
-                location: chord.location,
+                moment: chord.moment,
                 name: NAME,
                 type: Problem::ERROR_TYPE,
               )

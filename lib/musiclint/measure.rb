@@ -1,9 +1,10 @@
 require 'musiclint/chord'
+require 'musiclint/moment'
 require 'musiclint/nil-chord'
 require 'musiclint/note'
 
 module MusicLint
-  class ChordLocationMismatchError < StandardError
+  class ChordMomentMismatchError < StandardError
   end
 
   class Measure
@@ -20,6 +21,23 @@ module MusicLint
       @chords = Hash.new { |h, k| h[k] = NilChord.new }
     end
 
+    def notes_sounding_at(divisions:, notes_starting_at:, time_of_sound:)
+      notes = {}
+      times = notes_starting_at.keys.sort
+
+      times.each do |t|
+        if t <= time_of_sound
+          notes_starting_at[t].find_all(&:note?).each do |note|
+            if t + note.duration / divisions > time_of_sound
+              notes[note.voice] = note
+            end
+          end
+        end
+      end
+
+      notes.values
+    end
+
     def parse(measure_node:, part_id:)
       @number ||= measure_node.attribute('number').content.to_i
 
@@ -29,32 +47,35 @@ module MusicLint
 
       if @divisions
         total_duration = Hash.new(BigDecimal("0"))
-        index = 0
-        notes_at_time ||= Hash.new { |h, k| h[k] = [] }
+        notes_starting_at ||= Hash.new { |h, k| h[k] = [] }
 
         measure_node.xpath('note').map { |n|
           Note.new(part_id: part_id, xml_node: n)
         }.each do |note|
           voice = "#{part_id}-#{note.voice}"
-          total_duration[voice] += note.duration / @divisions
           time = total_duration[voice]
-          notes_at_time[time] << note
+          total_duration[voice] += note.duration / @divisions
+          notes_starting_at[time] << note
         end
 
-        times = notes_at_time.keys.sort
+        times = notes_starting_at.keys.sort
         times.each do |t|
-          notes_to_add = notes_at_time[t].find_all(&:note?)
+          notes_to_add = notes_sounding_at(
+            divisions: @divisions,
+            notes_starting_at: notes_starting_at,
+            time_of_sound: t
+          )
 
           if notes_to_add.any?
-            location = "measure #{@number}, beat #{t.to_s('F')}"
+            moment = Moment.new(measure_number: @number, time_in_measure: t)
 
-            existing_location = @chords[t].location
-            if existing_location && existing_location != location
-              raise ChordLocationMismatchError.new("Will not merge chords in different locations. #{existing_location} != #{location}")
+            existing_moment = @chords[t].moment
+            if existing_moment && existing_moment != moment
+              raise ChordMomentMismatchError.new("Will not merge chords from different moments. #{existing_moment} != #{moment}")
             end
 
             @chords[t] = @chords[t].merge(
-              Chord.new(location: location).tap { |chord|
+              Chord.new(moment: moment).tap { |chord|
                 notes_to_add.each do |note|
                   chord.add_note(note)
                 end
