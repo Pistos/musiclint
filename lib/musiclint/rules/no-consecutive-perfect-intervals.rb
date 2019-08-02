@@ -10,6 +10,15 @@ module MusicLint
       }
       NAME = 'no-consecutive-perfect-intervals'
 
+      def check
+        @chords.each_with_index do |chord, i|
+          next_chord = @chords[i+1] || NilChord.new
+          process_chord_pair(chord, next_chord)
+        end
+
+        @problems
+      end
+
       private def consecutive_perfect_intervals?(interval, next_interval)
         interval.perfect? &&
         interval.simple_number_integer != 4 &&
@@ -21,15 +30,6 @@ module MusicLint
         @score = score
         @chords = @score.chords
         @problems = []
-      end
-
-      def check
-        @chords.each_with_index do |chord, i|
-          next_chord = @chords[i+1] || NilChord.new
-          process_chord_pair(chord, next_chord)
-        end
-
-        @problems
       end
 
       private def process_chord_pair(chord, next_chord)
