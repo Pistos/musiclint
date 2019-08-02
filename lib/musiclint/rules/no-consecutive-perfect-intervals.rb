@@ -10,39 +10,41 @@ module MusicLint
       }
       NAME = 'no-consecutive-perfect-intervals'
 
+      private def consecutive_perfect_intervals?(interval, next_interval)
+        interval.perfect? &&
+        interval.simple_number_integer != 4 &&
+        next_interval.perfect? &&
+        next_interval.simple_number_integer != 4
+      end
+
       def initialize(score)
         @score = score
+        @chords = @score.chords
+        @problems = []
       end
 
       def check
-        problems = []
-
-        chords = @score.chords
-        chords.each_with_index do |chord, i|
-          next_chord = chords[i+1] || NilChord.new
-          intervals = chord.intervals
-          next_intervals = next_chord.intervals
-
-          intervals.each do |voices, int|
-            next_int = next_intervals[voices] || NilInterval.new
-
-            if (
-              int.perfect? &&
-              int.simple_number_integer != 4 &&
-              next_int.perfect? &&
-              next_int.simple_number_integer != 4
-            )
-              problems << Problem.new(
-                details: "Consecutive perfect intervals: voices #{voices}  #{int}, #{next_int}",
-                moment: chord.moment,
-                name: NAME,
-                type: Problem::ERROR_TYPE,
-              )
-            end
-          end
+        @chords.each_with_index do |chord, i|
+          next_chord = @chords[i+1] || NilChord.new
+          process_chord_pair(chord, next_chord)
         end
 
-        problems
+        @problems
+      end
+
+      private def process_chord_pair(chord, next_chord)
+        chord.intervals.each do |voices, int|
+          next_int = next_chord.intervals[voices] || NilInterval.new
+
+          if consecutive_perfect_intervals?(int, next_int)
+            @problems << Problem.new(
+              details: "Consecutive perfect intervals: voices #{voices}  #{int}, #{next_int}",
+              moment: chord.moment,
+              name: NAME,
+              type: Problem::ERROR_TYPE,
+            )
+          end
+        end
       end
     end
   end
