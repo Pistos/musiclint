@@ -71,7 +71,9 @@ module MusicLint
 
             existing_moment = @chords[t].moment
             if existing_moment && existing_moment != moment
-              raise ChordMomentMismatchError.new("Will not merge chords from different moments. #{existing_moment} != #{moment}")
+              raise ChordMomentMismatchError.new(
+                "Will not merge chords from different moments. #{existing_moment} != #{moment}"
+              )
             end
 
             @chords[t] = @chords[t].merge(
