@@ -35,22 +35,25 @@ module MusicLint
     end
 
     def initialize(xml_node:)
-      @octave = xml_node.at('octave').content.to_i
+      parsed = parse(xml_node: xml_node)
 
-      alter_node = xml_node.at('alter')
-      if alter_node
-        alter = alter_node.content.to_i
-      else
-        alter = 0
-      end
-      step = xml_node.at('step').content
+      alter = parsed[:alter]
+      step = parsed[:step]
       accidental = ACCIDENTAL_FOR[alter]
-
       display_step = "#{step}#{accidental}"
 
+      @octave = parsed[:octave]
       @staff_position = @octave * 7 + STEP_TO_STAFF_POSITION[step]
       @to_i = @octave * 12 + STEP_TO_INT[step] + alter
       @to_s = "#{display_step}#{@octave}"
+    end
+
+    private def parse(xml_node:)
+      {
+        alter: xml_node.at('alter')&.content.to_i,
+        octave: xml_node.at('octave').content.to_i,
+        step: xml_node.at('step').content,
+      }
     end
   end
 end

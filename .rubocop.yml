@@ -16,6 +16,8 @@ Naming/BinaryOperatorParameterName:
   Enabled: false
 Naming/FileName:
   Enabled: false
+Style/AccessModifierDeclarations:
+  EnforcedStyle: 'inline'
 Style/BlockDelimiters:
   EnforcedStyle: 'semantic'
 Style/ConditionalAssignment:
