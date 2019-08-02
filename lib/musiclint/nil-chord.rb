@@ -14,7 +14,7 @@ module MusicLint
       chord
     end
 
-    def note_by(voice:)
+    def note_by(*)
       nil  # NilNote.new
     end
 
