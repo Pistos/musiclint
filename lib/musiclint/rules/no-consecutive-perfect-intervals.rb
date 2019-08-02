@@ -4,6 +4,10 @@ require 'musiclint/problem'
 module MusicLint
   module Rules
     class NoConsecutivePerfectIntervals
+      DESCRIPTION = %{
+        Disallow a perfect interval in the same two voices in two
+        consecutive chords.  Perfect fourths are not considered.
+      }
       NAME = 'no-consecutive-perfect-intervals'
 
       def self.check(score)
