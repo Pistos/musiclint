@@ -2,3 +2,5 @@ inherit_from: '../.rubocop.yml'
 
 Lint/AmbiguousBlockAssociation:
   Enabled: false
+Metrics/BlockLength:
+  Max: 128
