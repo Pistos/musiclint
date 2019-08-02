@@ -10,10 +10,14 @@ module MusicLint
       }
       NAME = 'no-consecutive-perfect-intervals'
 
-      def self.check(score)
+      def initialize(score)
+        @score = score
+      end
+
+      def check
         problems = []
 
-        chords = score.chords
+        chords = @score.chords
         chords.each_with_index do |chord, i|
           next_chord = chords[i+1] || NilChord.new
           intervals = chord.intervals

@@ -21,7 +21,7 @@ module MusicLint
       ]
 
       rules.each do |rule|
-        problems += rule.check(@score)
+        problems += rule.new(@score).check
       end
 
       problems.each do |problem|
