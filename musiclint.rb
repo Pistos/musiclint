@@ -7,6 +7,15 @@ require 'musiclint/rules/no-consecutive-perfect-intervals'
 
 module MusicLint
   class App
+    private def count_str(countable:, countable_type:)
+      plural_morpheme = countable.count == 1 ? '' : 's'
+      "#{countable.count} #{countable_type}#{plural_morpheme}"
+    end
+
+    private def errors
+      @_errors ||= problems.find_all(&:error?)
+    end
+
     def initialize
       doc = Nokogiri::XML(
         IO.read(ARGV[0])
@@ -14,32 +23,31 @@ module MusicLint
       @score = Score.new(xml_doc: doc)
     end
 
+    RULES = [
+      Rules::NoConsecutivePerfectIntervals,
+    ]
+
+    private def problems
+      @_problems ||= RULES.reduce([]) { |problems, rule|
+        problems + rule.new(@score).check
+      }
+    end
+
     def run
-      problems = []
-      rules = [
-        Rules::NoConsecutivePerfectIntervals,
-      ]
-
-      rules.each do |rule|
-        problems += rule.new(@score).check
-      end
-
       problems.each do |problem|
         puts problem
       end
 
-      error_count = problems.find_all(&:error?).count
-      warning_count = problems.find_all(&:warning?).count
-      problem_plural_morpheme = problems.count == 1 ? '' : 's'
-      error_plural_morpheme = error_count == 1 ? '' : 's'
-      warning_plural_morpheme = warning_count == 1 ? '' : 's'
-
-      problem_str = "#{problems.count} problem#{problem_plural_morpheme}"
-      error_str = "#{error_count} error#{error_plural_morpheme}"
-      warning_str = "#{warning_count} warning#{warning_plural_morpheme}"
+      problem_str = count_str(countable: problems, countable_type: 'problem')
+      error_str = count_str(countable: errors, countable_type: 'error')
+      warning_str = count_str(countable: warnings, countable_type: 'warning')
 
       puts
       puts "   #{problem_str} (#{error_str}, #{warning_str})"
+    end
+
+    private def warnings
+      @_warnings ||= problems.find_all(&:warning?)
     end
   end
 end
