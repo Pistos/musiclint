@@ -14,6 +14,8 @@ Metrics/MethodLength:
   Max: 30
 Naming/BinaryOperatorParameterName:
   Enabled: false
+Naming/MemoizedInstanceVariableName:
+  Enabled: false
 Naming/FileName:
   Enabled: false
 Style/AccessModifierDeclarations:
